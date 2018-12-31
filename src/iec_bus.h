@@ -587,6 +587,7 @@ public:
 
 	static bool GetInputButtonPressed(int buttonIndex) { return InputButton[buttonIndex] && !InputButtonPrev[buttonIndex]; }
 	static bool GetInputButtonReleased(int buttonIndex) { return InputButton[buttonIndex] == false; }
+	static u8 GetRotaryVirtualButtonPressed() { u8 tmp = upDownRotary; upDownRotary = 0; return tmp; };
 	static bool GetInputButton(int buttonIndex) { return InputButton[buttonIndex]; }
 	static bool GetInputButtonRepeating(int buttonIndex) { return inputRepeat[buttonIndex] != inputRepeatPrev[buttonIndex]; }
 	static bool GetInputButtonHeld(int buttonIndex) { return inputRepeatThreshold[buttonIndex] >= INPUT_BUTTON_DEBOUNCE_THRESHOLD + (INPUT_BUTTON_REPEAT_THRESHOLD * 2); }
@@ -634,5 +635,7 @@ private:
 	static u32 inputRepeatThreshold[5];
 	static u32 inputRepeat[5];
 	static u32 inputRepeatPrev[5];
+	
+	static u8 upDownRotary;
 };
 #endif

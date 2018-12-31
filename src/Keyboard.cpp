@@ -33,7 +33,7 @@ Keyboard* Keyboard::instance;
 
 void Keyboard::KeyPressedHandlerRaw(TUSBKeyboardDevice* device, unsigned char modifiers, const unsigned char RawKeys[6])
 {
-	// byte 0 - modifires
+	// byte 0 - modifiers
 	//  bit 0: left control
 	//  bit 1 : left shift
 	//  bit 2 : left alt

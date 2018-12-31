@@ -17,6 +17,7 @@
 // along with Pi1541. If not, see <http://www.gnu.org/licenses/>.
 
 #include "iec_bus.h"
+#include "InputMappings.h"
 
 static int buttonCount = sizeof(ButtonPinFlags) / sizeof(unsigned);
 
@@ -66,6 +67,8 @@ u32 IEC_Bus::inputRepeatPrev[5] = { 0 };
 
 
 u32 IEC_Bus::emulationModeCheckButtonIndex = 0;
+u8  IEC_Bus::upDownRotary = 0;
+
 
 unsigned IEC_Bus::gplev0;
 
@@ -75,12 +78,20 @@ void IEC_Bus::ReadBrowseMode(void)
 	IOPort* portB = 0;
 	gplev0 = read32(ARM_GPIO_GPLEV0);
 
-	int index;
-	for (index = 0; index < buttonCount; ++index)
+	int buttonIndex;
+	for (buttonIndex = 0; buttonIndex < buttonCount; ++buttonIndex)
 	{
-		UpdateButton(index, gplev0);
+		UpdateButton(buttonIndex, gplev0);
 	}
 
+	if (GetInputButtonPressed(1))
+	{
+		if (InputButton[2])
+			IEC_Bus::upDownRotary = DOWN_FLAG;
+		else
+			IEC_Bus::upDownRotary = UP_FLAG;
+	}
+	
 	bool ATNIn = (gplev0 & PIGPIO_MASK_IN_ATN) == (invertIECInputs ? PIGPIO_MASK_IN_ATN : 0);
 	if (PI_Atn != ATNIn)
 	{
@@ -125,6 +136,13 @@ void IEC_Bus::ReadButtonsEmulationMode(void)
 	for (buttonIndex = 0; buttonIndex < 3; ++buttonIndex)
 	{
 		UpdateButton(buttonIndex, gplev0);
+	}
+	if (GetInputButtonPressed(1))
+	{
+		if (InputButton[2])
+			upDownRotary = NEXT_FLAG;
+		else
+			upDownRotary = PREV_FLAG;
 	}
 }
 

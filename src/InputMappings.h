@@ -20,6 +20,7 @@
 #define InputMappings_H
 #include "Keyboard.h"
 
+#define NONE_FLAG		0
 #define ESC_FLAG		(1 << 0)
 #define NEXT_FLAG		(1 << 1)
 #define PREV_FLAG		(1 << 2)
@@ -64,6 +65,9 @@ protected:
 
 	bool enterButtonPressedPrev;
 	bool enterButtonPressed;
+	
+	bool upButtonPressedPrev;
+	bool upButtonPressed;
 
 	unsigned keyboardNumLetter;
 	unsigned inputROMOrDevice;
