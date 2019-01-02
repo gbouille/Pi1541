@@ -169,6 +169,14 @@ void ClearGpioEvent(rpi_gpio_pin_t gpio)
 	RPI_GpioBase->GPEDS0[offset] |= mask;
 }
 
+int testGpioEvent(rpi_gpio_pin_t gpio)
+{
+	unsigned mask = (1 << (gpio % 32));
+	unsigned offset = gpio / 32;
+
+	return RPI_GpioBase->GPEDS0[offset] & mask;
+}
+
 void SetACTLed(int value)
 {
 #if defined(RPI3)

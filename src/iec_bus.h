@@ -25,6 +25,9 @@
 
 #include "rpi-gpio.h"
 #include "rpiHardware.h"
+#include "interrupt.h"
+
+#include "InputMappings.h"
 
 #define INPUT_BUTTON_DEBOUNCE_THRESHOLD 20000
 #define INPUT_BUTTON_REPEAT_THRESHOLD 460000
@@ -308,6 +311,10 @@ public:
 		}
 		RPI_GpioBase->GPPUD = 0;
 		RPI_GpioBase->GPPUDCLK0 = 0;
+		
+		// Add interrupt on input button 1 rise edge
+		InterruptSystemConnectIRQ(ARM_IRQ_GPIO0, rotaryButtonIRQHandler,0);
+		EnableGpioDetect((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2, ARM_GPIO_GPAREN0);
 	}
 
 	static inline void LetSRQBePulledHigh()
@@ -594,7 +601,20 @@ public:
 
 	static bool OutputLED;
 	static bool OutputSound;
-
+	
+	static void rotaryButtonIRQHandler(void* pParam)
+	{
+		if (testGpioEvent((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2))
+	  //RPI_GetGpioValue((rpi_gpio_pin_t)PIGPIO_IN_BUTTON3)
+		{ 
+			if (read32(ARM_GPIO_GPLEV0) & ButtonPinFlags[2])
+				IEC_Bus::upDownRotary = DOWN_FLAG;
+			else
+				IEC_Bus::upDownRotary = UP_FLAG;
+			ClearGpioEvent((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2);
+		}
+	}
+	
 private:
 	static bool splitIECLines;
 	static bool invertIECInputs;

@@ -122,8 +122,10 @@ void InputMappings::CheckButtonsEmulationMode()
 
 	if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_ENTER))
 		SetButtonFlag(ESC_FLAG);
-	else if (rotaryUpDownNone != NONE_FLAG)
-		SetButtonFlag(rotaryUpDownNone);
+	else if (rotaryUpDownNone == UP_FLAG)
+		SetButtonFlag(PREV_FLAG);
+	else if (rotaryUpDownNone == DOWN_FLAG)
+		SetButtonFlag(NEXT_FLAG);
 	//else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_BACK))
 	//	SetButtonFlag(BACK_FLAG);
 	//else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_INSERT))

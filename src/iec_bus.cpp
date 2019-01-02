@@ -84,14 +84,6 @@ void IEC_Bus::ReadBrowseMode(void)
 		UpdateButton(buttonIndex, gplev0);
 	}
 
-	if (GetInputButtonPressed(1))
-	{
-		if (InputButton[2])
-			IEC_Bus::upDownRotary = DOWN_FLAG;
-		else
-			IEC_Bus::upDownRotary = UP_FLAG;
-	}
-	
 	bool ATNIn = (gplev0 & PIGPIO_MASK_IN_ATN) == (invertIECInputs ? PIGPIO_MASK_IN_ATN : 0);
 	if (PI_Atn != ATNIn)
 	{
