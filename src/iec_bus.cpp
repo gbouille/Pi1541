@@ -67,7 +67,11 @@ u32 IEC_Bus::inputRepeatPrev[5] = { 0 };
 
 
 u32 IEC_Bus::emulationModeCheckButtonIndex = 0;
-u8  IEC_Bus::upDownRotary = 0;
+
+bool IEC_Bus::useRotaryButton = false;
+int IEC_Bus::clockButtonIndex;
+int IEC_Bus::dataButtonIndex;
+u32  IEC_Bus::upDownRotary = 0;
 
 
 unsigned IEC_Bus::gplev0;
@@ -128,13 +132,6 @@ void IEC_Bus::ReadButtonsEmulationMode(void)
 	for (buttonIndex = 0; buttonIndex < 3; ++buttonIndex)
 	{
 		UpdateButton(buttonIndex, gplev0);
-	}
-	if (GetInputButtonPressed(1))
-	{
-		if (InputButton[2])
-			upDownRotary = NEXT_FLAG;
-		else
-			upDownRotary = PREV_FLAG;
 	}
 }
 

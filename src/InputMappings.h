@@ -47,6 +47,8 @@
 #define END_FLAG		(1 << 20)
 
 #define FUNCTION_FLAG		(1 << 21)
+#define ROTARY_CLOCKWISE	(1 << 22)
+#define ROTARY_CCLOCKWISE	(1 << 23)
 // dont exceed 32!!
 
 
@@ -112,12 +114,12 @@ public:
 
 	inline bool NextDisk()
 	{
-		return KeyboardFlag(NEXT_FLAG)/* | UartFlag(NEXT_FLAG)*/ | ButtonFlag(NEXT_FLAG);
+		return KeyboardFlag(NEXT_FLAG)/* | UartFlag(NEXT_FLAG)*/ | ButtonFlag(NEXT_FLAG) | ButtonFlag(ROTARY_CLOCKWISE);
 	}
 
 	inline bool PrevDisk()
 	{
-		return KeyboardFlag(PREV_FLAG)/* | UartFlag(PREV_FLAG)*/ | ButtonFlag(PREV_FLAG);
+		return KeyboardFlag(PREV_FLAG)/* | UartFlag(PREV_FLAG)*/ | ButtonFlag(PREV_FLAG) | ButtonFlag(ROTARY_CCLOCKWISE);
 	}
 
 	inline bool AutoLoad() { return KeyboardFlag(AUTOLOAD_FLAG); }
@@ -141,7 +143,7 @@ public:
 
 	inline bool BrowseUp()
 	{
-		return KeyboardFlag(UP_FLAG)/* | UartFlag(UP_FLAG)*/ | ButtonFlag(UP_FLAG);
+		return KeyboardFlag(UP_FLAG)/* | UartFlag(UP_FLAG)*/ | ButtonFlag(UP_FLAG) | ButtonFlag(ROTARY_CCLOCKWISE);
 	}
 
 	inline bool BrowsePageUp()
@@ -152,7 +154,7 @@ public:
 
 	inline bool BrowseDown()
 	{
-		return KeyboardFlag(DOWN_FLAG)/* | UartFlag(DOWN_FLAG)*/ | ButtonFlag(DOWN_FLAG);
+		return KeyboardFlag(DOWN_FLAG)/* | UartFlag(DOWN_FLAG)*/ | ButtonFlag(DOWN_FLAG) | ButtonFlag(ROTARY_CLOCKWISE);
 	}
 
 	inline bool BrowsePageDown()

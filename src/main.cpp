@@ -820,11 +820,11 @@ EXIT_TYPE Emulate1541(FileBrowser* fileBrowser)
 			bool prevDisk = inputMappings->PrevDisk();
 			if (nextDisk)
 			{
-				pi1541.drive.Insert(diskCaddy.PrevDisk());
+				pi1541.drive.Insert(diskCaddy.NextDisk());
 			}
 			else if (prevDisk)
 			{
-				pi1541.drive.Insert(diskCaddy.NextDisk());
+				pi1541.drive.Insert(diskCaddy.PrevDisk());
 			}
 			else if (inputMappings->directDiskSwapRequest != 0)
 			{
@@ -1014,11 +1014,11 @@ EXIT_TYPE Emulate1581(FileBrowser* fileBrowser)
 			bool prevDisk = inputMappings->PrevDisk();
 			if (nextDisk)
 			{
-				pi1581.Insert(diskCaddy.PrevDisk());
+				pi1581.Insert(diskCaddy.NextDisk());
 			}
 			else if (prevDisk)
 			{
-				pi1581.Insert(diskCaddy.NextDisk());
+				pi1581.Insert(diskCaddy.PrevDisk());
 			}
 			else if (inputMappings->directDiskSwapRequest != 0)
 			{
@@ -1747,7 +1747,7 @@ extern "C"
 		pi1541.drive.SetVIA(&pi1541.VIA[1]);
 		pi1541.VIA[0].GetPortB()->SetPortOut(0, IEC_Bus::PortB_OnPortOut);
 
-		IEC_Bus::Initialise();
+		IEC_Bus::Initialise(options.UseRotaryButton(),options.GetButtonUp(),options.GetButtonDown());
 
 		if (screenLCD)
 			screenLCD->ClearInit(0);

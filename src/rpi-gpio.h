@@ -200,7 +200,7 @@ extern void RPI_ToggleGpio(rpi_gpio_pin_t gpio);
 extern void EnableGpioDetect(rpi_gpio_pin_t gpio, unsigned type);
 extern void DisableGpioDetect(rpi_gpio_pin_t gpio, unsigned type);
 extern void ClearGpioEvent(rpi_gpio_pin_t gpio);
-extern int testGpioEvent(rpi_gpio_pin_t gpio);
+extern int TestGpioEvent(rpi_gpio_pin_t gpio);
 
 extern void SetACTLed(int value);
 

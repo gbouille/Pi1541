@@ -169,7 +169,7 @@ void ClearGpioEvent(rpi_gpio_pin_t gpio)
 	RPI_GpioBase->GPEDS0[offset] |= mask;
 }
 
-int testGpioEvent(rpi_gpio_pin_t gpio)
+int TestGpioEvent(rpi_gpio_pin_t gpio)
 {
 	unsigned mask = (1 << (gpio % 32));
 	unsigned offset = gpio / 32;

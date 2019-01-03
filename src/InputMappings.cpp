@@ -44,7 +44,7 @@ InputMappings::InputMappings()
 bool InputMappings::CheckButtonsBrowseMode()
 {
 	buttonFlags = 0;
-	u8 rotaryUpDownNone = IEC_Bus::GetRotaryVirtualButtonPressed();
+	u32 rotaryUpDownNone = IEC_Bus::GetRotaryVirtualButtonPressed();
 
 	if (IEC_Bus::GetInputButtonHeld(INPUT_BUTTON_INSERT))	// Change DeviceID
 	{
@@ -92,10 +92,10 @@ bool InputMappings::CheckButtonsBrowseMode()
 			inputROMOrDevice = 4;
 		}
 	}
-//	else if (IEC_Bus::GetInputButtonRepeating(INPUT_BUTTON_UP))
-//		SetButtonFlag(UP_FLAG);
-//	else if (IEC_Bus::GetInputButtonRepeating(INPUT_BUTTON_DOWN))
-//		SetButtonFlag(DOWN_FLAG);
+	else if (IEC_Bus::GetInputButtonRepeating(INPUT_BUTTON_UP))
+		SetButtonFlag(UP_FLAG);
+	else if (IEC_Bus::GetInputButtonRepeating(INPUT_BUTTON_DOWN))
+		SetButtonFlag(DOWN_FLAG);
 	else if (rotaryUpDownNone != NONE_FLAG)
 		SetButtonFlag(rotaryUpDownNone);
 	else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_BACK))
@@ -118,14 +118,16 @@ bool InputMappings::CheckButtonsBrowseMode()
 void InputMappings::CheckButtonsEmulationMode()
 {
 	buttonFlags = 0;
-	u8 rotaryUpDownNone = IEC_Bus::GetRotaryVirtualButtonPressed();
+	u32 rotaryUpDownNone = IEC_Bus::GetRotaryVirtualButtonPressed();
 
 	if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_ENTER))
 		SetButtonFlag(ESC_FLAG);
-	else if (rotaryUpDownNone == UP_FLAG)
-		SetButtonFlag(PREV_FLAG);
-	else if (rotaryUpDownNone == DOWN_FLAG)
+	else if (rotaryUpDownNone != NONE_FLAG)
+		SetButtonFlag(rotaryUpDownNone);
+	else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_UP))
 		SetButtonFlag(NEXT_FLAG);
+	else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_DOWN))
+		SetButtonFlag(PREV_FLAG);
 	//else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_BACK))
 	//	SetButtonFlag(BACK_FLAG);
 	//else if (IEC_Bus::GetInputButtonPressed(INPUT_BUTTON_INSERT))

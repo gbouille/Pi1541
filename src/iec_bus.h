@@ -141,6 +141,7 @@ enum PIGPIOMasks
 };
 
 static const unsigned ButtonPinFlags[5] = { PIGPIO_MASK_IN_BUTTON1, PIGPIO_MASK_IN_BUTTON2, PIGPIO_MASK_IN_BUTTON3, PIGPIO_MASK_IN_BUTTON4, PIGPIO_MASK_IN_BUTTON5 };
+static const unsigned ButtonPin[5] = { PIGPIO_IN_BUTTON1, PIGPIO_IN_BUTTON2, PIGPIO_IN_BUTTON3, PIGPIO_IN_BUTTON4, PIGPIO_IN_BUTTON5 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Original Non-split lines
@@ -236,7 +237,7 @@ typedef bool(*CheckStatus)();
 class IEC_Bus
 {
 public:
-	static inline void Initialise(void)
+	static inline void Initialise(unsigned int useRotary, unsigned int clkButton, unsigned int dtButton)
 	{
 		volatile int index; // Force a real delay in the loop below.
 
@@ -312,9 +313,14 @@ public:
 		RPI_GpioBase->GPPUD = 0;
 		RPI_GpioBase->GPPUDCLK0 = 0;
 		
-		// Add interrupt on input button 1 rise edge
-		InterruptSystemConnectIRQ(ARM_IRQ_GPIO0, rotaryButtonIRQHandler,0);
-		EnableGpioDetect((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2, ARM_GPIO_GPAREN0);
+		if (useRotary == 1)
+		{ // Add interrupt on input button 1 asynchronous rise edge
+			useRotaryButton = true;
+			clockButtonIndex = clkButton;
+			dataButtonIndex = dtButton;
+			InterruptSystemConnectIRQ(ARM_IRQ_GPIO0, rotaryButtonIRQHandler,0);
+			EnableGpioDetect((rpi_gpio_pin_t)ButtonPin[clockButtonIndex], ARM_GPIO_GPREN0);
+		}
 	}
 
 	static inline void LetSRQBePulledHigh()
@@ -325,34 +331,38 @@ public:
 
 	static inline void UpdateButton(int index, unsigned gplev0)
 	{
-		bool inputcurrent = (gplev0 & ButtonPinFlags[index]) == 0;
-
-		InputButtonPrev[index] = InputButton[index];
-		inputRepeatPrev[index] = inputRepeat[index];
-
-		if (inputcurrent)
+		if ((useRotaryButton && !((index == clockButtonIndex) || (index == dataButtonIndex))) || !useRotaryButton)
+			// In case of rotary button use, don't update button up and button down
 		{
-			validInputCount[index]++;
-			if (validInputCount[index] == INPUT_BUTTON_DEBOUNCE_THRESHOLD)
-			{
-				InputButton[index] = true;
-				inputRepeatThreshold[index] = INPUT_BUTTON_DEBOUNCE_THRESHOLD + INPUT_BUTTON_REPEAT_THRESHOLD;
-				inputRepeat[index]++;
-			}
+			bool inputcurrent = (gplev0 & ButtonPinFlags[index]) == 0;
 
-			if (validInputCount[index] == inputRepeatThreshold[index])
+			InputButtonPrev[index] = InputButton[index];
+			inputRepeatPrev[index] = inputRepeat[index];
+
+			if (inputcurrent)
 			{
-				inputRepeat[index]++;
-				inputRepeatThreshold[index] += INPUT_BUTTON_REPEAT_THRESHOLD / inputRepeat[index];
+				validInputCount[index]++;
+				if (validInputCount[index] == INPUT_BUTTON_DEBOUNCE_THRESHOLD)
+				{
+					InputButton[index] = true;
+					inputRepeatThreshold[index] = INPUT_BUTTON_DEBOUNCE_THRESHOLD + INPUT_BUTTON_REPEAT_THRESHOLD;
+					inputRepeat[index]++;
+				}
+
+				if (validInputCount[index] == inputRepeatThreshold[index])
+				{
+					inputRepeat[index]++;
+					inputRepeatThreshold[index] += INPUT_BUTTON_REPEAT_THRESHOLD / inputRepeat[index];
+				}
 			}
-		}
-		else
-		{
-			InputButton[index] = false;
-			validInputCount[index] = 0;
-			inputRepeatThreshold[index] = INPUT_BUTTON_REPEAT_THRESHOLD;
-			inputRepeat[index] = 0;
-			inputRepeatPrev[index] = 0;
+			else
+			{
+				InputButton[index] = false;
+				validInputCount[index] = 0;
+				inputRepeatThreshold[index] = INPUT_BUTTON_REPEAT_THRESHOLD;
+				inputRepeat[index] = 0;
+				inputRepeatPrev[index] = 0;
+			}
 		}
 	}
 
@@ -594,7 +604,7 @@ public:
 
 	static bool GetInputButtonPressed(int buttonIndex) { return InputButton[buttonIndex] && !InputButtonPrev[buttonIndex]; }
 	static bool GetInputButtonReleased(int buttonIndex) { return InputButton[buttonIndex] == false; }
-	static u8 GetRotaryVirtualButtonPressed() { u8 tmp = upDownRotary; upDownRotary = 0; return tmp; };
+	static u32 GetRotaryVirtualButtonPressed() { u32 tmp = upDownRotary; upDownRotary = 0; return tmp; };
 	static bool GetInputButton(int buttonIndex) { return InputButton[buttonIndex]; }
 	static bool GetInputButtonRepeating(int buttonIndex) { return inputRepeat[buttonIndex] != inputRepeatPrev[buttonIndex]; }
 	static bool GetInputButtonHeld(int buttonIndex) { return inputRepeatThreshold[buttonIndex] >= INPUT_BUTTON_DEBOUNCE_THRESHOLD + (INPUT_BUTTON_REPEAT_THRESHOLD * 2); }
@@ -604,14 +614,14 @@ public:
 	
 	static void rotaryButtonIRQHandler(void* pParam)
 	{
-		if (testGpioEvent((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2))
-	  //RPI_GetGpioValue((rpi_gpio_pin_t)PIGPIO_IN_BUTTON3)
+		
+		if (TestGpioEvent((rpi_gpio_pin_t)ButtonPin[clockButtonIndex]))
 		{ 
-			if (read32(ARM_GPIO_GPLEV0) & ButtonPinFlags[2])
-				IEC_Bus::upDownRotary = DOWN_FLAG;
+			if (read32(ARM_GPIO_GPLEV0) & ButtonPinFlags[dataButtonIndex])	
+				upDownRotary = ROTARY_CLOCKWISE;
 			else
-				IEC_Bus::upDownRotary = UP_FLAG;
-			ClearGpioEvent((rpi_gpio_pin_t)PIGPIO_IN_BUTTON2);
+				upDownRotary = ROTARY_CCLOCKWISE;
+			ClearGpioEvent((rpi_gpio_pin_t)ButtonPin[clockButtonIndex]);
 		}
 	}
 	
@@ -656,6 +666,9 @@ private:
 	static u32 inputRepeat[5];
 	static u32 inputRepeatPrev[5];
 	
-	static u8 upDownRotary;
+	static bool useRotaryButton;
+	static int clockButtonIndex;
+	static int dataButtonIndex;
+	static u32 upDownRotary;
 };
 #endif

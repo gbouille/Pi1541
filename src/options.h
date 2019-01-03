@@ -92,6 +92,7 @@ public:
 
 	inline float ScrollHighlightRate() const { return scrollHighlightRate; }
 
+	inline unsigned int UseRotaryButton() const { return useRotaryButton; }
 	inline unsigned int GetButtonEnter() const { return buttonEnter - 1; }
 	inline unsigned int GetButtonUp() const { return buttonUp - 1; }
 	inline unsigned int GetButtonDown() const { return buttonDown - 1; }
@@ -148,6 +149,7 @@ private:
 
 	unsigned int keyboardBrowseLCDScreen;
 
+	unsigned int useRotaryButton;
         u8 buttonEnter;
         u8 buttonUp;
         u8 buttonDown;
